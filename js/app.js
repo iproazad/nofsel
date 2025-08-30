@@ -225,13 +225,24 @@ function setupPhotoInput(inputId, previewId) {
   });
 }
 
-// Convert record card to image and download
+// Convert record card to image and download with high quality
 function saveRecordCardAsImage(cardElement, filename) {
   // Use html2canvas library if available
   if (typeof html2canvas !== 'undefined') {
-    html2canvas(cardElement).then(canvas => {
-      // Convert canvas to data URL
-      const imgData = canvas.toDataURL('image/png');
+    // Set high quality options
+    const options = {
+      scale: 3, // Higher scale for better quality
+      useCORS: true, // Enable CORS for images
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+      letterRendering: true,
+      imageTimeout: 0
+    };
+    
+    html2canvas(cardElement, options).then(canvas => {
+      // Convert canvas to data URL with high quality
+      const imgData = canvas.toDataURL('image/png', 1.0);
       
       // Create download link
       const link = document.createElement('a');

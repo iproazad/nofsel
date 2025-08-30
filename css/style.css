@@ -277,41 +277,273 @@ header h1 {
 /* Record Card Styles */
 .record-card {
   background-color: white;
-  border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  padding: 15px;
-  margin-bottom: 20px;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  padding: 0;
+  margin-bottom: 30px;
+  overflow: hidden;
+  border: none;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 0 15px 15px;
+}
+
+.record-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
 }
 
 .record-card-header {
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 10px;
-  margin-bottom: 10px;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  padding: 20px;
+  margin-bottom: 0;
+  text-align: center;
+  position: relative;
+  border-bottom: 5px solid rgba(255, 255, 255, 0.2);
 }
 
 .record-card-title {
-  font-size: 18px;
+  font-size: 26px;
   font-weight: bold;
+  margin-bottom: 8px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.record-card-date {
+  font-size: 14px;
+  opacity: 0.9;
+  font-style: italic;
 }
 
 .record-card-body {
+  padding: 20px;
   display: flex;
+  flex-direction: column;
+  background-color: #f9f9f9;
+  gap: 20px;
+}
+
+.record-card-section {
+  width: 100%;
+  margin-bottom: 0;
+  border: 1px solid #e0e0e0;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  background-color: white;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.record-card-section:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+@media (max-width: 768px) {
+  .record-card-section {
+    width: 100%;
+  }
+}
+
+.section-header {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  padding: 15px 20px;
+  font-weight: bold;
+  border-bottom: none;
+  color: white;
+  font-size: 20px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+  position: relative;
+  text-align: center;
+  position: relative;
+}
+
+.section-header:before {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 5px;
+  background-color: var(--primary-color);
+}
+
+.section-body {
+  padding: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  background-color: white;
+  border-radius: 0 0 15px 15px;
+}
+
+/* جعل معلومات القضية أفقية */
+.record-card-section:first-child .section-body {
+  flex-direction: row;
+  justify-content: space-between;
   flex-wrap: wrap;
 }
 
 .record-card-body .info-group {
-  flex: 1 0 50%;
-  padding: 5px;
+  flex: 1 0 25%;
+  padding: 8px 5px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.record-card-body .info-group:hover {
+  background-color: #f8f9fa;
+  transform: translateX(-2px);
+}
+
+.record-card-section:first-child .section-body .info-group {
+  flex: 1 0 20%;
+  min-width: 200px;
+}
+
+@media (max-width: 992px) {
+  .record-card-body .info-group {
+    flex: 1 0 33.33%;
+  }
+}
+
+@media (max-width: 576px) {
+  .record-card-body .info-group {
+    flex: 1 0 50%;
+  }
+}
+
+@media (max-width: 480px) {
+  .record-card-body .info-group {
+    flex: 1 0 100%;
+  }
 }
 
 .info-label {
   font-weight: bold;
-  margin-bottom: 3px;
+  margin-bottom: 8px;
+  color: var(--secondary-color);
+  font-size: 15px;
+  border-right: 3px solid var(--primary-color);
+  padding-right: 8px;
 }
 
 .info-value {
   margin-bottom: 10px;
+  padding: 8px 0;
+  color: var(--dark-color);
+  font-size: 16px;
 }
+
+.person-info {
+  display: flex;
+  flex-wrap: wrap;
+  border: 1px solid #e0e0e0;
+  padding: 15px;
+  margin-top: 10px;
+  background-color: #f8f9ff;
+  border-radius: 15px;
+  transition: all 0.3s ease;
+  align-items: center;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+  width: 100%;
+}
+
+.person-info:hover {
+  background-color: #f0f7ff;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transform: translateY(-3px);
+}
+
+/* جعل بيانات الأشخاص أفقية */
+.record-card-section:nth-child(2) .section-body {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+@media (max-width: 992px) {
+  .record-card-section:nth-child(2) .section-body {
+    flex-direction: column;
+  }
+}
+
+.person-photo {
+  flex: 0 0 120px;
+  margin-left: 20px;
+}
+
+.person-info h5 {
+  width: 100%;
+  margin-bottom: 10px;
+  font-size: 18px;
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--secondary-color);
+  padding-bottom: 8px;
+  text-align: center;
+}
+
+.person-photo-container {
+  border-radius: 15px !important;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15) !important;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+  width: 120px !important;
+  height: 120px !important;
+  border: 3px solid white;
+}
+
+.person-photo-container:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2) !important;
+}
+
+.person-details {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  background-color: white;
+  border-radius: 15px;
+  padding: 10px 15px;
+  margin-right: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.person-details .info-group {
+  flex: 1 0 33.33%;
+  padding: 8px;
+  border-bottom: 1px dashed #eee;
+}
+
+@media (max-width: 992px) {
+  .person-details .info-group {
+    flex: 1 0 50%;
+  }
+}
+
+@media (max-width: 576px) {
+  .person-details .info-group {
+    flex: 1 0 100%;
+  }
+}
+
+.record-card-footer {
+  background: linear-gradient(to left, var(--primary-color), var(--secondary-color));
+  border-top: none;
+  padding: 10px;
+  text-align: center;
+  font-size: 14px;
+  color: white;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
 
 /* Responsive Styles */
 @media (max-width: 768px) {

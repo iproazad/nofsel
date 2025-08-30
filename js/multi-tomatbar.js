@@ -441,64 +441,85 @@ function populateRecordCard(cardElement, record) {
   let cardContent = `
     <div class="record-card-header">
       <h3 class="record-card-title">${record.issueType || 'بلاغ'}</h3>
-      <p>${formatDate(record.timestamp)}</p>
+      <p class="record-card-date">${formatDate(record.timestamp)}</p>
     </div>
     <div class="record-card-body">
   `;
   
-  // Add issue details
+  // Add issue details section
   cardContent += `
-    <div class="info-group">
-      <div class="info-label">نوع المشكلة:</div>
-      <div class="info-value">${record.issueType || '-'}</div>
-    </div>
-    <div class="info-group">
-      <div class="info-label">الوقت:</div>
-      <div class="info-value">${record.timeFrom || '-'} إلى ${record.timeTo || '-'}</div>
-    </div>
-    <div class="info-group">
-      <div class="info-label">الفترة:</div>
-      <div class="info-value">${record.period || '-'}</div>
-    </div>
-    <div class="info-group">
-      <div class="info-label">المكان:</div>
-      <div class="info-value">${record.location || '-'}</div>
-    </div>
-    <div class="info-group">
-      <div class="info-label">اسم السائق:</div>
-      <div class="info-value">${record.driverName || '-'}</div>
-    </div>
-    <div class="info-group">
-      <div class="info-label">النقطة:</div>
-      <div class="info-value">${record.point || '-'}</div>
-    </div>
-    <div class="info-group">
-      <div class="info-label">تمت الإحالة إلى:</div>
-      <div class="info-value">${record.sentTo || '-'}</div>
+    <div class="record-card-section">
+      <div class="section-header">معلومات القضية</div>
+      <div class="section-body">
+        <div class="info-group">
+          <div class="info-label">نوع المشكلة:</div>
+          <div class="info-value">${record.issueType || '-'}</div>
+        </div>
+        <div class="info-group">
+          <div class="info-label">الوقت:</div>
+          <div class="info-value">${record.timeFrom || '-'} إلى ${record.timeTo || '-'}</div>
+        </div>
+        <div class="info-group">
+          <div class="info-label">الفترة:</div>
+          <div class="info-value">${record.period || '-'}</div>
+        </div>
+        <div class="info-group">
+          <div class="info-label">المكان:</div>
+          <div class="info-value">${record.location || '-'}</div>
+        </div>
+        <div class="info-group">
+          <div class="info-label">اسم السائق:</div>
+          <div class="info-value">${record.driverName || '-'}</div>
+        </div>
+        <div class="info-group">
+          <div class="info-label">النقطة:</div>
+          <div class="info-value">${record.point || '-'}</div>
+        </div>
+        <div class="info-group">
+          <div class="info-label">تمت الإحالة إلى:</div>
+          <div class="info-value">${record.sentTo || '-'}</div>
+        </div>
+      </div>
     </div>
   `;
   
   // Add persons information
   if (record.persons && record.persons.length > 0) {
-    cardContent += `<div class="info-group" style="flex-basis: 100%;"><h4>معلومات الأشخاص:</h4></div>`;
+    cardContent += `
+      <div class="record-card-section">
+        <div class="section-header">بيانات الأشخاص (${record.persons.length})</div>
+        <div class="section-body">
+    `;
     
     record.persons.forEach((person, index) => {
       cardContent += `
-        <div class="info-group" style="flex-basis: 100%; border-top: 1px solid #ddd; padding-top: 10px; margin-top: 10px;">
+        <div class="person-info">
           <h5>الشخص ${index + 1}: ${person.type || '-'}</h5>
-        </div>
       `;
+      
+      // Add photo and person details in a horizontal flex layout
+      cardContent += `<div class="person-photo">`;
       
       // Add photo if available
       if (person.photoData) {
         cardContent += `
-          <div class="info-group">
-            <div class="person-photo-container" style="width: 100px; height: 100px;">
-              <img src="${person.photoData}" alt="صورة الشخص" style="max-width: 100%; max-height: 100%; display: block;" />
-            </div>
+          <div class="person-photo-container">
+            <img src="${person.photoData}" alt="صورة الشخص" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
+          </div>
+        `;
+      } else {
+        cardContent += `
+          <div class="person-photo-container">
+            <span style="font-size: 24px; color: #ccc;"><i class="fas fa-user"></i></span>
           </div>
         `;
       }
+      
+      cardContent += `</div>`;
+      
+      // Person details in horizontal layout
+      cardContent += `<div class="person-details">`;
+
       
       cardContent += `
         <div class="info-group">
@@ -540,20 +561,42 @@ function populateRecordCard(cardElement, record) {
           </div>
         `;
       }
+      
+      // Close person-details and person-info divs
+      cardContent += `
+          </div>
+        </div>
+      `;
     });
+    
+    // Close section-body and record-card-section divs
+    cardContent += `
+        </div>
+      </div>
+    `;
   }
   
   // Add notes if available
   if (record.notes) {
     cardContent += `
-      <div class="info-group" style="flex-basis: 100%;">
-        <div class="info-label">ملاحظات:</div>
-        <div class="info-value">${record.notes}</div>
+      <div class="record-card-section">
+        <div class="section-header">ملاحظات</div>
+        <div class="section-body">
+          <div class="info-group" style="flex-basis: 100%;">
+            <div class="info-value">${record.notes}</div>
+          </div>
+        </div>
       </div>
     `;
   }
   
-  cardContent += `</div>`; // Close record-card-body
+  // Add footer with timestamp
+  cardContent += `
+    </div>
+    <div class="record-card-footer">
+      تم إنشاء هذه البطاقة بتاريخ: ${formatDate(record.timestamp)}
+    </div>
+  `;
   
   // Set card content
   cardElement.innerHTML = cardContent;
