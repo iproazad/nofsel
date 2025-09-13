@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import type { LogoConfig } from './types';
 import { LogoStyle } from './types';
@@ -43,7 +42,11 @@ function App() {
       setGeneratedLogos(logos);
     } catch (err) {
       if (err instanceof Error) {
-        setError(err.message);
+        if (err.message.includes('API_KEY environment variable not set')) {
+          setError('Application configuration error. Could not connect to the generative AI service.');
+        } else {
+          setError(err.message);
+        }
       } else {
         setError('An unexpected error occurred.');
       }
