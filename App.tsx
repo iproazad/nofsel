@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Header from './components/Header.tsx';
 import StyleButton from './components/StyleButton.tsx';
 import Spinner from './components/Spinner.tsx';
@@ -21,14 +21,33 @@ const App: React.FC = () => {
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [apiKey, setApiKey] = useState<string>('');
+  const [tempApiKey, setTempApiKey] = useState<string>('');
+
+  useEffect(() => {
+    const savedApiKey = localStorage.getItem('geminiApiKey');
+    if (savedApiKey) {
+      setApiKey(savedApiKey);
+      setTempApiKey(savedApiKey);
+    }
+  }, []);
+
+  const handleSaveApiKey = () => {
+    localStorage.setItem('geminiApiKey', tempApiKey);
+    setApiKey(tempApiKey);
+  };
 
   const handleGenerateLogo = useCallback(async () => {
+    if (!apiKey) {
+      setError("Please enter and save your Gemini API Key first.");
+      return;
+    }
     setIsLoading(true);
     setError(null);
     setGeneratedImage(null);
 
     try {
-      const imageB64 = await generateLogoImage(prompt);
+      const imageB64 = await generateLogoImage(prompt, apiKey);
       setGeneratedImage(`data:image/png;base64,${imageB64}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred.');
@@ -36,7 +55,7 @@ const App: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [prompt]);
+  }, [prompt, apiKey]);
 
   const addStyleToPrompt = (style: string) => {
     setPrompt(prev => `${prev.replace(/, [A-Za-z]+ style\.$/, '')}, ${style.toLowerCase()} style.`);
@@ -56,6 +75,29 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center p-4 sm:p-6 lg:p-8 font-sans">
       <div className="w-full max-w-4xl mx-auto">
         <Header />
+
+        <div className="mt-6 bg-gray-800/50 backdrop-blur-sm p-6 sm:p-8 rounded-2xl shadow-2xl border border-gray-700">
+          <label htmlFor="api-key" className="block text-sm font-medium text-indigo-300 mb-2">
+            Your Gemini API Key
+          </label>
+          <div className="flex gap-2">
+            <input
+              id="api-key"
+              type="password"
+              className="flex-grow bg-gray-900 border border-gray-600 rounded-lg p-3 text-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 placeholder-gray-500"
+              placeholder="Enter your Gemini API Key here"
+              value={tempApiKey}
+              onChange={(e) => setTempApiKey(e.target.value)}
+            />
+            <button
+              onClick={handleSaveApiKey}
+              className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300"
+            >
+              Save
+            </button>
+          </div>
+           {apiKey && <p className="text-xs text-green-400 mt-2">API Key is set.</p>}
+        </div>
 
         <main className="mt-6 bg-gray-800/50 backdrop-blur-sm p-6 sm:p-8 rounded-2xl shadow-2xl border border-gray-700">
           <div className="flex flex-col lg:flex-row gap-8">
@@ -88,7 +130,7 @@ const App: React.FC = () => {
 
               <button
                 onClick={handleGenerateLogo}
-                disabled={isLoading}
+                disabled={isLoading || !apiKey}
                 className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center transition-all duration-300 transform hover:scale-105 shadow-lg"
               >
                 {isLoading ? (
@@ -100,6 +142,7 @@ const App: React.FC = () => {
                   '✨ Generate Super Logo'
                 )}
               </button>
+               {!apiKey && <p className="text-xs text-yellow-400 text-center mt-2">Please save your API key to enable generation.</p>}
             </div>
 
             {/* Right Side: Display */}
@@ -134,6 +177,7 @@ const App: React.FC = () => {
               {!isLoading && !generatedImage && !error && (
                  <div className="text-center text-gray-500">
                     <p>Your generated logo will appear here.</p>
+                    <p className="text-xs mt-2">Enter your API key above to begin.</p>
                  </div>
               )}
             </div>
