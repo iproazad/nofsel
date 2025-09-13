@@ -1,17 +1,25 @@
 
 import { GoogleGenAI } from "@google/genai";
 
-const API_KEY = process.env.API_KEY;
+// Lazily initialize the AI client to prevent app crash on load if API key is not set.
+let ai: GoogleGenAI | null = null;
 
-if (!API_KEY) {
-  throw new Error("API_KEY environment variable not set");
-}
+const getAiClient = () => {
+  if (!ai) {
+    const API_KEY = process.env.API_KEY;
+    if (!API_KEY) {
+      throw new Error("API_KEY environment variable not set.");
+    }
+    ai = new GoogleGenAI({ apiKey: API_KEY });
+  }
+  return ai;
+};
 
-const ai = new GoogleGenAI({ apiKey: API_KEY });
 
 export const generateLogosApi = async (prompt: string): Promise<string[]> => {
   try {
-    const response = await ai.models.generateImages({
+    const client = getAiClient();
+    const response = await client.models.generateImages({
         model: 'imagen-4.0-generate-001',
         prompt: prompt,
         config: {
