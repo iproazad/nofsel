@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import Header from './components/Header.tsx';
 import StyleButton from './components/StyleButton.tsx';
 import Spinner from './components/Spinner.tsx';
@@ -21,26 +21,14 @@ const App: React.FC = () => {
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [apiKey, setApiKey] = useState<string>(() => localStorage.getItem('geminiApiKey') || '');
-  const [isKeyInputVisible, setIsKeyInputVisible] = useState<boolean>(() => !localStorage.getItem('geminiApiKey'));
-
-  useEffect(() => {
-    if (apiKey) {
-      localStorage.setItem('geminiApiKey', apiKey);
-    }
-  }, [apiKey]);
 
   const handleGenerateLogo = useCallback(async () => {
-    if (!apiKey) {
-      setError("Please enter your Gemini API Key first.");
-      return;
-    }
     setIsLoading(true);
     setError(null);
     setGeneratedImage(null);
 
     try {
-      const imageB64 = await generateLogoImage(prompt, apiKey);
+      const imageB64 = await generateLogoImage(prompt);
       setGeneratedImage(`data:image/png;base64,${imageB64}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred.');
@@ -48,7 +36,7 @@ const App: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [prompt, apiKey]);
+  }, [prompt]);
 
   const addStyleToPrompt = (style: string) => {
     setPrompt(prev => `${prev.replace(/, [A-Za-z]+ style\.$/, '')}, ${style.toLowerCase()} style.`);
@@ -69,35 +57,7 @@ const App: React.FC = () => {
       <div className="w-full max-w-4xl mx-auto">
         <Header />
 
-        <div className="my-6 bg-gray-800/50 p-4 rounded-lg border border-gray-700">
-            {!isKeyInputVisible && apiKey ? (
-                 <div className="flex items-center justify-between">
-                    <p className="text-sm text-green-400">Gemini API Key is set.</p>
-                    <button onClick={() => setIsKeyInputVisible(true)} className="text-sm text-indigo-400 hover:text-indigo-300">Change Key</button>
-                 </div>
-            ) : (
-                 <div>
-                    <label htmlFor="apiKey" className="block text-sm font-medium text-indigo-300 mb-2">
-                      Enter Your Gemini API Key
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        id="apiKey"
-                        type="password"
-                        className="w-full bg-gray-900 border border-gray-600 rounded-lg p-3 text-gray-200 focus:ring-2 focus:ring-indigo-500"
-                        placeholder="Enter your key here and it will be saved..."
-                        value={apiKey}
-                        onChange={(e) => setApiKey(e.target.value)}
-                      />
-                      {apiKey && (
-                         <button onClick={() => setIsKeyInputVisible(false)} className="px-4 py-2 text-sm font-medium bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">Save</button>
-                      )}
-                    </div>
-                 </div>
-            )}
-        </div>
-
-        <main className="bg-gray-800/50 backdrop-blur-sm p-6 sm:p-8 rounded-2xl shadow-2xl border border-gray-700">
+        <main className="mt-6 bg-gray-800/50 backdrop-blur-sm p-6 sm:p-8 rounded-2xl shadow-2xl border border-gray-700">
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Left Side: Controls */}
             <div className="lg:w-1/2 flex flex-col space-y-6">
@@ -128,7 +88,7 @@ const App: React.FC = () => {
 
               <button
                 onClick={handleGenerateLogo}
-                disabled={isLoading || !apiKey}
+                disabled={isLoading}
                 className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center transition-all duration-300 transform hover:scale-105 shadow-lg"
               >
                 {isLoading ? (

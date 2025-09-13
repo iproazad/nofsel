@@ -1,15 +1,18 @@
 
 import { GoogleGenAI } from "@google/genai";
 
+// WARNING: Storing your API key directly in the code is insecure and can lead to misuse.
+// It's recommended to use a backend proxy for production applications.
+const apiKey = "AIzaSyAVyGBYtdeVQq9BbUgP-yNsKQqm0zKInvI";
+
 /**
  * Generates a logo image using the Gemini API.
  * @param prompt The text prompt describing the desired logo.
- * @param apiKey The user-provided Gemini API key.
  * @returns A promise that resolves to the base64 encoded image string.
  */
-export const generateLogoImage = async (prompt: string, apiKey: string): Promise<string> => {
+export const generateLogoImage = async (prompt: string): Promise<string> => {
   if (!apiKey) {
-    throw new Error("Gemini API key is missing. Please enter it in the input field.");
+    throw new Error("Gemini API key is not set in services/geminiService.ts.");
   }
   
   const ai = new GoogleGenAI({ apiKey: apiKey });
