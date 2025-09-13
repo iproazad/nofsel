@@ -27,7 +27,11 @@ export const generateLogosApi = async (prompt: string, apiKey: string): Promise<
     if (error instanceof Error) {
         // Provide a more specific error message for authentication failures.
         if (error.message.includes('API key not valid')) {
-             throw new Error('Failed to generate logos: The provided API Key is not valid. Please check and try again.');
+             throw new Error('The provided API Key is not valid. Please check it and try again.');
+        }
+        // Provide a specific message for billing issues.
+        if (error.message.includes('only accessible to billed users')) {
+            throw new Error('This feature requires a Google Cloud project with billing enabled. Please set up a billing account for the project associated with your API key.');
         }
         throw new Error(`Failed to generate logos: ${error.message}`);
     }
