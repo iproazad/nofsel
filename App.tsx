@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { generateLogoImage } from './services/geminiService';
 import Header from './components/Header';
 import StyleButton from './components/StyleButton';
@@ -17,18 +17,36 @@ const LOGO_STYLES = [
 ];
 
 const App: React.FC = () => {
+  const [apiKey, setApiKey] = useState<string>('');
   const [prompt, setPrompt] = useState<string>('A dynamic and modern logo for a channel named "kaar", featuring a stylized letter K. High resolution, suitable for branding.');
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const storedApiKey = localStorage.getItem('gemini_api_key');
+    if (storedApiKey) {
+      setApiKey(storedApiKey);
+    }
+  }, []);
+
+  const handleApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newKey = e.target.value;
+    setApiKey(newKey);
+    localStorage.setItem('gemini_api_key', newKey);
+  };
 
   const handleGenerateLogo = useCallback(async () => {
+    if (!apiKey) {
+      setError("Please enter your Gemini API key to generate a logo.");
+      return;
+    }
     setIsLoading(true);
     setError(null);
     setGeneratedImage(null);
 
     try {
-      const imageB64 = await generateLogoImage(prompt);
+      const imageB64 = await generateLogoImage(prompt, apiKey);
       setGeneratedImage(`data:image/png;base64,${imageB64}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred.');
@@ -36,7 +54,7 @@ const App: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [prompt]);
+  }, [prompt, apiKey]);
 
   const addStyleToPrompt = (style: string) => {
     setPrompt(prev => `${prev.replace(/, [A-Za-z]+ style\.$/, '')}, ${style.toLowerCase()} style.`);
@@ -58,6 +76,27 @@ const App: React.FC = () => {
         <Header />
 
         <main className="mt-8 bg-gray-800/50 backdrop-blur-sm p-6 sm:p-8 rounded-2xl shadow-2xl border border-gray-700">
+          <div className="mb-6 p-4 bg-gray-900 border border-indigo-500/30 rounded-lg">
+            <label htmlFor="api-key" className="block text-sm font-medium text-indigo-300 mb-2">
+              Enter Your Gemini API Key
+            </label>
+            <input
+              id="api-key"
+              type="password"
+              className="w-full bg-gray-800 border border-gray-600 rounded-lg p-3 text-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 placeholder-gray-500"
+              placeholder="Paste your API key here"
+              value={apiKey}
+              onChange={handleApiKeyChange}
+              aria-describedby="api-key-help"
+            />
+            <p id="api-key-help" className="mt-2 text-xs text-gray-400">
+              Your key is stored only in your browser's local storage.
+              <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:underline ml-1">
+                Get an API Key here.
+              </a>
+            </p>
+          </div>
+
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Left Side: Controls */}
             <div className="lg:w-1/2 flex flex-col space-y-6">
@@ -88,8 +127,8 @@ const App: React.FC = () => {
 
               <button
                 onClick={handleGenerateLogo}
-                disabled={isLoading}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-900 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center transition-all duration-300 transform hover:scale-105 shadow-lg"
+                disabled={isLoading || !apiKey}
+                className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center transition-all duration-300 transform hover:scale-105 shadow-lg"
               >
                 {isLoading ? (
                   <>
@@ -100,6 +139,11 @@ const App: React.FC = () => {
                   '✨ Generate Super Logo'
                 )}
               </button>
+               {!apiKey && (
+                <p className="text-center text-xs text-yellow-400 -mt-4">
+                  API Key is required to generate logos.
+                </p>
+              )}
             </div>
 
             {/* Right Side: Display */}
@@ -134,6 +178,7 @@ const App: React.FC = () => {
               {!isLoading && !generatedImage && !error && (
                  <div className="text-center text-gray-500">
                     <p>Your generated logo will appear here.</p>
+                    <p className="text-xs mt-2">Enter your API key above to begin.</p>
                  </div>
               )}
             </div>
