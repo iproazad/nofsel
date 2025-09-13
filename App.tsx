@@ -3,6 +3,7 @@ import React, { useState, useCallback } from 'react';
 import Header from './components/Header.tsx';
 import StyleButton from './components/StyleButton.tsx';
 import Spinner from './components/Spinner.tsx';
+import { generateLogoImage } from './services/geminiService.ts';
 
 const LOGO_STYLES = [
   "Minimalist",
@@ -27,23 +28,7 @@ const App: React.FC = () => {
     setGeneratedImage(null);
 
     try {
-      const response = await fetch('/.netlify/functions/generateLogo', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ prompt }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `Request failed with status ${response.status}`);
-      }
-
-      const { imageB64 } = await response.json();
-      if (!imageB64) {
-        throw new Error('No image data received from the server.');
-      }
+      const imageB64 = await generateLogoImage(prompt);
       setGeneratedImage(`data:image/png;base64,${imageB64}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred.');
