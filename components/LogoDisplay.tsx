@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 const Spinner: React.FC = () => (
@@ -13,6 +12,27 @@ const Alert: React.FC<{ message: string }> = ({ message }) => (
     <span className="block sm:inline">{message}</span>
   </div>
 );
+
+const BillingErrorAlert: React.FC = () => (
+    <div className="bg-amber-900/50 border border-amber-700 text-amber-200 p-6 rounded-lg text-center" role="alert">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto mb-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01M12 14v3m-4.5-4.5H6.343a1 1 0 01-1-1V6.343a1 1 0 011-1H7.5m11 11H17.657a1 1 0 011 1v2.157a1 1 0 01-1 1H16.5m-5 0h.01" />
+        </svg>
+        <h3 className="text-xl font-bold text-amber-300 mb-2">Action Required: Enable Billing</h3>
+        <p className="mb-4">
+            To use Google's advanced Imagen API for logo generation, your Google Cloud project must have a billing account enabled. This is a standard requirement for high-demand AI services.
+        </p>
+        <a
+            href="https://console.cloud.google.com/billing"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block bg-amber-600 text-white font-bold py-2 px-6 rounded-md hover:bg-amber-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-amber-500"
+        >
+            Go to Google Cloud Billing
+        </a>
+    </div>
+);
+
 
 const LogoCard: React.FC<{ src: string, index: number }> = ({ src, index }) => (
     <div className="group relative aspect-square bg-slate-800 rounded-lg overflow-hidden border border-slate-700/50 transition-all duration-300 hover:shadow-2xl hover:shadow-sky-500/20 hover:border-sky-500">
@@ -48,6 +68,10 @@ export const LogoDisplay: React.FC<LogoDisplayProps> = ({ logos, isLoading, erro
     }
 
     if (error) {
+        // Check for the specific billing error message
+        if (error.includes('billing enabled')) {
+            return <BillingErrorAlert />;
+        }
       return <Alert message={error} />;
     }
 

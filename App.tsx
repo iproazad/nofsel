@@ -6,6 +6,8 @@ import { Header } from './components/Header';
 import { LogoConfigForm } from './components/LogoConfigForm';
 import { LogoDisplay } from './components/LogoDisplay';
 
+const USAGE_STORAGE_KEY = 'kaar-logo-usage';
+const DAILY_LIMIT = 5;
 
 function App() {
   const [config, setConfig] = useState<LogoConfig>({
@@ -18,12 +20,36 @@ function App() {
   const [generatedLogos, setGeneratedLogos] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [usage, setUsage] = useState({ count: 0, limit: DAILY_LIMIT });
+
   
-  // Load API key from local storage on initial render
+  // Load API key and usage from local storage on initial render
   useEffect(() => {
     const storedApiKey = localStorage.getItem('gemini-api-key');
     if (storedApiKey) {
       setApiKey(storedApiKey);
+    }
+    
+    const storedUsage = localStorage.getItem(USAGE_STORAGE_KEY);
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+
+    if (storedUsage) {
+      try {
+        const parsedUsage = JSON.parse(storedUsage);
+        if (parsedUsage.date === today) {
+          setUsage({ count: parsedUsage.count, limit: DAILY_LIMIT });
+        } else {
+          // It's a new day, reset the count
+          localStorage.setItem(USAGE_STORAGE_KEY, JSON.stringify({ date: today, count: 0 }));
+          setUsage({ count: 0, limit: DAILY_LIMIT });
+        }
+      } catch {
+        // Corrupted data, reset it
+        localStorage.setItem(USAGE_STORAGE_KEY, JSON.stringify({ date: today, count: 0 }));
+      }
+    } else {
+        // No usage data found, initialize it
+        localStorage.setItem(USAGE_STORAGE_KEY, JSON.stringify({ date: today, count: 0 }));
     }
   }, []);
 
@@ -38,8 +64,11 @@ function App() {
   const handleGenerateLogos = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!apiKey.trim()) {
-      setError('Please enter your Gemini API Key to generate logos.');
+    const limitReached = usage.count >= usage.limit;
+
+    // If limit is reached, an API key is now required.
+    if (limitReached && !apiKey.trim()) {
+      setError('You have reached the daily free limit. Please enter your Gemini API Key to continue.');
       return;
     }
 
@@ -61,8 +90,18 @@ function App() {
     `;
 
     try {
-      const logos = await generateLogosApi(prompt, apiKey);
+      // Pass the user's API key only if the limit is reached, otherwise use the demo key internally.
+      const logos = await generateLogosApi(prompt, limitReached ? apiKey : undefined);
       setGeneratedLogos(logos);
+
+      // On success, update usage count only if it was a free generation
+      if (!limitReached) {
+        const newCount = usage.count + 1;
+        const today = new Date().toISOString().split('T')[0];
+        setUsage(prev => ({ ...prev, count: newCount }));
+        localStorage.setItem(USAGE_STORAGE_KEY, JSON.stringify({ date: today, count: newCount }));
+      }
+
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -87,6 +126,7 @@ function App() {
               setApiKey={setApiKey}
               onSubmit={handleGenerateLogos}
               isLoading={isLoading}
+              usage={usage}
             />
           </div>
           <div className="lg:col-span-2">
