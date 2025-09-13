@@ -1,9 +1,9 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { generateLogoImage } from './services/geminiService';
-import Header from './components/Header';
-import StyleButton from './components/StyleButton';
-import Spinner from './components/Spinner';
+import { generateLogoImage } from './services/geminiService.ts';
+import Header from './components/Header.tsx';
+import StyleButton from './components/StyleButton.tsx';
+import Spinner from './components/Spinner.tsx';
 
 const LOGO_STYLES = [
   "Minimalist",
