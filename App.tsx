@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { LogoConfig } from './types';
 import { LogoStyle } from './types';
 import { generateLogosApi } from './services/geminiService';
@@ -14,12 +14,35 @@ function App() {
     text: 'Kaar',
     details: 'Sleek and dynamic feel',
   });
+  const [apiKey, setApiKey] = useState<string>('');
   const [generatedLogos, setGeneratedLogos] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Load API key from local storage on initial render
+  useEffect(() => {
+    const storedApiKey = localStorage.getItem('gemini-api-key');
+    if (storedApiKey) {
+      setApiKey(storedApiKey);
+    }
+  }, []);
+
+  // Save API key to local storage whenever it changes
+  useEffect(() => {
+    if (apiKey) {
+      localStorage.setItem('gemini-api-key', apiKey);
+    }
+  }, [apiKey]);
+
 
   const handleGenerateLogos = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!apiKey.trim()) {
+      setError('Please enter your Gemini API Key to generate logos.');
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
     setGeneratedLogos([]);
@@ -38,15 +61,11 @@ function App() {
     `;
 
     try {
-      const logos = await generateLogosApi(prompt);
+      const logos = await generateLogosApi(prompt, apiKey);
       setGeneratedLogos(logos);
     } catch (err) {
       if (err instanceof Error) {
-        if (err.message.includes('API_KEY environment variable not set')) {
-          setError('Application configuration error. Could not connect to the generative AI service.');
-        } else {
-          setError(err.message);
-        }
+        setError(err.message);
       } else {
         setError('An unexpected error occurred.');
       }
@@ -64,6 +83,8 @@ function App() {
             <LogoConfigForm
               config={config}
               setConfig={setConfig}
+              apiKey={apiKey}
+              setApiKey={setApiKey}
               onSubmit={handleGenerateLogos}
               isLoading={isLoading}
             />

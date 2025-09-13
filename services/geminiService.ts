@@ -1,25 +1,13 @@
 import { GoogleGenAI } from "@google/genai";
 
-// Lazily initialize the AI client to prevent app crash on load if API key is not set.
-let ai: GoogleGenAI | null = null;
-
-const getAiClient = () => {
-  if (!ai) {
-    // Use REACT_APP_ prefix for client-side environment variables on Netlify
-    const API_KEY = process.env.REACT_APP_API_KEY;
-    if (!API_KEY) {
-      throw new Error("API_KEY environment variable not set.");
-    }
-    ai = new GoogleGenAI({ apiKey: API_KEY });
+export const generateLogosApi = async (prompt: string, apiKey: string): Promise<string[]> => {
+  if (!apiKey) {
+    throw new Error("Gemini API Key is required.");
   }
-  return ai;
-};
 
-
-export const generateLogosApi = async (prompt: string): Promise<string[]> => {
   try {
-    const client = getAiClient();
-    const response = await client.models.generateImages({
+    const ai = new GoogleGenAI({ apiKey });
+    const response = await ai.models.generateImages({
         model: 'imagen-4.0-generate-001',
         prompt: prompt,
         config: {
@@ -37,6 +25,10 @@ export const generateLogosApi = async (prompt: string): Promise<string[]> => {
   } catch (error) {
     console.error("Error generating images with Gemini:", error);
     if (error instanceof Error) {
+        // Provide a more specific error message for authentication failures.
+        if (error.message.includes('API key not valid')) {
+             throw new Error('Failed to generate logos: The provided API Key is not valid. Please check and try again.');
+        }
         throw new Error(`Failed to generate logos: ${error.message}`);
     }
     throw new Error("An unknown error occurred while generating logos.");
