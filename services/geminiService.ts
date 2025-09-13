@@ -1,4 +1,3 @@
-
 import { GoogleGenAI } from "@google/genai";
 
 // Lazily initialize the AI client to prevent app crash on load if API key is not set.
@@ -6,7 +5,8 @@ let ai: GoogleGenAI | null = null;
 
 const getAiClient = () => {
   if (!ai) {
-    const API_KEY = process.env.API_KEY;
+    // Use REACT_APP_ prefix for client-side environment variables on Netlify
+    const API_KEY = process.env.REACT_APP_API_KEY;
     if (!API_KEY) {
       throw new Error("API_KEY environment variable not set.");
     }
