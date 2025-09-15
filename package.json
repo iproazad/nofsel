@@ -1,17 +1,25 @@
 {
-  "name": "copy-of-kaar-logo-generator",
+  "name": "copy-of-مترجم-اللغات-الفوري-3",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "ng serve",
+    "build": "ng build",
+    "preview": "ng serve --configuration=production"
   },
   "dependencies": {
+    "rxjs": "^7.8.2",
+    "@angular/compiler": "^20.1.0",
+    "@angular/platform-browser": "^20.1.0",
+    "@angular/core": "^20.1.0",
+    "@angular/forms": "^20.1.6-0",
+    "@angular/common": "^20.1.0",
     "@google/genai": "^1.19.0",
-    "react-dom": "^19.1.1",
-    "react": "^19.1.1"
+    "@angular/build": "^20.1.0",
+    "@angular/cli": "^20.1.0",
+    "@angular/compiler-cli": "^20.1.0",
+    "tailwindcss": "latest"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
